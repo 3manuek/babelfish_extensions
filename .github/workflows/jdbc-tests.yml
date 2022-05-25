@@ -1,41 +1,36 @@
 name: JDBC Tests
-on: [push, pull_request]
+
+on:
+  workflow_call:
 
 jobs:
+
   run-babelfish-jdbc-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         id: checkout
 
-      - name: Install Dependencies
-        id: install-dependencies
-        if: always()
-        uses: ./.github/composite-actions/install-dependencies
+      - name: Download binaries
+        id: download-binaries
+        uses: actions/download-artifact@v3
+        with:
+          name: binaries
+          path: ./binaries.zip
 
-      - name: Build Modified Postgres
-        id: build-modified-postgres
-        if: always() && steps.install-dependencies.outcome == 'success'
-        uses: ./.github/composite-actions/build-modified-postgres
-      
-      - name: Compile ANTLR
-        id: compile-antlr
-        if: always() && steps.build-modified-postgres.outcome == 'success'
-        uses: ./.github/composite-actions/compile-antlr
-      
-      - name: Build Extensions
-        id: build-extensions
-        if: always() && steps.compile-antlr.outcome == 'success'
-        uses: ./.github/composite-actions/build-extensions
-      
+      - name: Unzip bins
+        id: unzip-bins
+        run: |
+          unzip -d ~/postgres/ /home/runner/work/babelfish_extensions/babelfish_extensions/binaries.zip
+
       - name: Install Extensions
         id: install-extensions
-        if: always() && steps.build-extensions.outcome == 'success'
+        if: always() && steps.unzip-bins.outcome == 'success'
         uses: ./.github/composite-actions/install-extensions
 
       - name: Run JDBC Tests
         id: jdbc
-        if: always() && steps.install-extensions.outcome == 'success'
+        #if: always() && steps.install-extensions.outcome == 'success'
         timeout-minutes: 15
         run: |
           cd test/JDBC/
