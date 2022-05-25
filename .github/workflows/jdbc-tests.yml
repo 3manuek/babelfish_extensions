@@ -11,17 +11,26 @@ jobs:
       - uses: actions/checkout@v2
         id: checkout
 
+      # - name: Download binaries
+      #   id: download-binaries
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: binaries
+      #     path: ./binaries.zip
+
       - name: Download binaries
         id: download-binaries
-        uses: actions/download-artifact@v3
+        # See https://github.com/marketplace/actions/download-workflow-artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: base.yml
           name: binaries
-          path: ./binaries.zip
+          path: ~/postgres #./binaries.zip
 
-      - name: Unzip bins
-        id: unzip-bins
-        run: |
-          unzip -d ~/postgres/ /home/runner/work/babelfish_extensions/babelfish_extensions/binaries.zip
+      # - name: Unzip bins
+      #   id: unzip-bins
+      #   run: |
+      #     unzip -d ~/postgres/ /home/runner/work/babelfish_extensions/babelfish_extensions/binaries.zip/binaries.zip
 
       - name: Install Extensions
         id: install-extensions

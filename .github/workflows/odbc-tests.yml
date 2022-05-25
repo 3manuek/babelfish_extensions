@@ -1,5 +1,4 @@
 name: ODBC Tests
-
 on:
   workflow_call:
 
@@ -13,18 +12,21 @@ jobs:
 
       - name: Download binaries
         id: download-binaries
-        uses: actions/download-artifact@v3
+        # See https://github.com/marketplace/actions/download-workflow-artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: base.yml
           name: binaries
+          path: ~/postgres
 
-      - name: Unzip bins
-        id: unzip-bins
-        run: |
-          unzip -d ~/postgres/ binaries.zip
+      # - name: Unzip bins
+      #   id: unzip-bins
+      #   run: |
+      #     unzip -d ~/postgres/ binaries.zip
 
       - name: Install Extensions
         id: install-extensions
-        if: always() && steps.unzip-bins.outcome == 'success'
+        if: always() && steps.download-binaries.outcome == 'success'
         uses: ./.github/composite-actions/install-extensions
 
       - name: Install ODBC Driver
